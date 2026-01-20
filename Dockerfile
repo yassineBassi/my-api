@@ -1,4 +1,4 @@
-FROM public.ecr.aws/docker/library/node:25 AS builder
+FROM public.ecr.aws/docker/library/node:20-alpine AS builder
 
 WORKDIR /app
 
@@ -12,14 +12,14 @@ RUN npm run build
 
 
 
-FROM public.ecr.aws/docker/library/node:25
+FROM public.ecr.aws/docker/library/node:20-alpine
 
 WORKDIR /app
 
 COPY package*.json .
-RUN npm ci
+RUN npm ci --omit=dev
 
-COPY --from=builder /app/dist .
+COPY --from=builder /app/dist ./dist
 
 EXPOSE 3000
 
