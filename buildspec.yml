@@ -25,6 +25,7 @@ phases:
   build:
     commands:
       - echo "Building Docker image"
+      - echo "ACCOUNT ID is $ACCOUNT_ID"
       - docker build -t $IMAGE_NAME .
       - docker tag $IMAGE_NAME $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_NAME:latest
       - docker tag $IMAGE_NAME $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_NAME:$COMMIT_HASH
