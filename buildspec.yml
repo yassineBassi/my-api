@@ -32,8 +32,5 @@ phases:
   post_build:
     commands: 
       - echo "Pushing Docker image to ECR---"
-      - echo "ACCOUNT ID is $ACCOUNT_ID"
-      - echo "$AWS_DEFAULT_REGION"
-      - aws ecr describe-repositories --region $AWS_DEFAULT_REGION
       - docker push $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_NAME:latest
       - echo "build completed"
