@@ -1,4 +1,4 @@
-FROM node:25 AS builder
+FROM public.ecr.aws/docker/library/node:25 AS builder
 
 WORKDIR /app
 
@@ -8,7 +8,11 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
-FROM node:25
+
+
+
+
+FROM public.ecr.aws/docker/library/node:25
 
 WORKDIR /app
 
