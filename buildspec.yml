@@ -2,7 +2,7 @@ version: 0.2
 
 env: 
   variables:
-    IMAGE_NAME: my-app
+    IMAGE_NAME: my-api
 
 phases: 
   install:
