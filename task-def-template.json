@@ -12,6 +12,7 @@
             "essential": true
 	}
     ],
+    "executionRoleArn": "arn:aws:iam::547323802553:role/ecsTaskExecutionRole",
     "networkMode": "awsvpc",
     "volumes": [],
     "requiresCompatibilities": [
