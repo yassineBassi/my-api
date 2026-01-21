@@ -31,6 +31,7 @@ phases:
       - docker tag $IMAGE_NAME $IMAGE_URI:latest
       - docker tag $IMAGE_NAME $IMAGE_URI:$COMMIT_HASH
 
+
   post_build:
     commands: 
       - echo "Pushing Docker image to ECR---"
