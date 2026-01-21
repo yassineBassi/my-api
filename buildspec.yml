@@ -43,7 +43,7 @@ phases:
       - echo "ARN is $TASK_ARN"
       - echo "Create appspec file for deployment"
       - cp appspec-template.json appspec.json
-      - sed -i "s|<TASK>|$TASK_ARN:latest|g" appspec.json 
+      - sed -i "s|<TASK>|$TASK_ARN|g" appspec.json 
       - cat appspec.json
       - echo "build completed"
 
