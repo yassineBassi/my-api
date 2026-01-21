@@ -33,4 +33,8 @@ phases:
     commands: 
       - echo "Pushing Docker image to ECR---"
       - docker push $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_NAME:latest
+      - echo "Creeate task definition revision"
+      - cp task-def-template.json task-def.json
+      - sed -i "s|<IMAGE_URL>|test|g" task-def.json
+      - aws ecs register-task-definition --cli-input-json file://task-def.json
       - echo "build completed"
