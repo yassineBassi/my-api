@@ -39,7 +39,7 @@ phases:
       - echo "Creeate task definition revision"
       - cp task-def-template.json task-def.json
       - sed -i "s|<IMAGE_URL>|$IMAGE_URI:latest|g" task-def.json
-      - TASK_ARN=$(echo aws ecs register-task-definition --cli-input-json file://task-def.jso | jq -r '.taskDefinition.taskDefinitionArn')
+      - TASK_ARN=$(aws ecs register-task-definition --cli-input-json file://task-def.jso | jq -r '.taskDefinition.taskDefinitionArn')
       - echo "ARN is $TASK_ARN"
       - echo "Create appspec file for deployment"
       - cp appspec-template.json appspec.json
