@@ -26,8 +26,10 @@ phases:
     commands:
       - echo "Building Docker image"
       - docker build -t $IMAGE_NAME .
-      - docker tag $IMAGE_NAME $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_NAME:latest
-      - docker tag $IMAGE_NAME $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_NAME:$COMMIT_HASH
+      - IMAGE_URI=$ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_NAME
+      - echo "$IMAGE_URI"
+      - docker tag $IMAGE_NAME $IMAGE_URI:latest
+      - docker tag $IMAGE_NAME $IMAGE_URI:$COMMIT_HASH
 
   post_build:
     commands: 
@@ -35,6 +37,6 @@ phases:
       - docker push $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_NAME:latest
       - echo "Creeate task definition revision"
       - cp task-def-template.json task-def.json
-      - sed -i "s|<IMAGE_URL>|test|g" task-def.json
+      - sed -i "s|<IMAGE_URL>|$IMAGE_URI:latest|g" task-def.json
       - aws ecs register-task-definition --cli-input-json file://task-def.json
       - echo "build completed"
