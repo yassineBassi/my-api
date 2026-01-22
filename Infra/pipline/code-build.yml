@@ -1,0 +1,65 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: "AWS::Serverless-2016-10-31"
+
+Parameters:
+  artifactsBucketName:
+    Type: String
+    Description: "The name of the S3 bucket to store CodePipeline artifacts"
+
+Resources:
+
+  ################### CodeBuild Role ###################
+  CodeBuildServiceRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "codebuild.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Policies:
+        - PolicyName: "CodeBuildAccessPolicy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource: "*"
+              - Effect: "Allow"
+                Action:
+                    - "s3:PutObject"
+                    - "s3:GetObject"
+                    - "s3:GetObjectVersion"
+                    - "s3:GetBucketAcl"
+                    - "s3:GetBucketLocation"
+                Resource:
+                  - !Sub "arn:aws:s3:::${artifactsBucketName}*"
+
+  ################### CodeBuild Project ###################
+  CodeBuildProject:
+    Type: "AWS::CodeBuild::Project"
+    Properties:
+      Name: "MyCodeApiBuildProject"
+      Source:
+        Type: "GITHUB"
+        Location: "https://github.com/yassineBassi/my-api.git"
+      Artifacts:
+        Type: "NO_ARTIFACTS"
+      Environment:
+        ComputeType: "BUILD_GENERAL1_SMALL"
+        Image: "aws/codebuild/standard:5.0"
+        Type: "LINUX_CONTAINER"
+      ServiceRole: !GetAtt CodeBuildServiceRole.Arn
+
+Outputs:
+  CodeBuildProjectName:
+    Value: !Ref CodeBuildProject
+    Description: "The name of the CodeBuild project"

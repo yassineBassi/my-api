@@ -1,0 +1,9 @@
+rollback on healthcheck fail
+rollback on alarm
+notification in wait time
+test ecr scan
+logging
+tags
+
+
+

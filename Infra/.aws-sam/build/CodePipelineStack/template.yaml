@@ -1,0 +1,96 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Parameters:
+  codeBuildProject:
+    Type: String
+    Description: The name of the CodeBuild project to use in the pipeline
+  artifactsBucketName:
+    Type: String
+    Description: The name of the S3 bucket to store CodePipeline artifacts
+Resources:
+  CodePipelineServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: CodePipelineServiceRole
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: codepipeline.amazonaws.com
+          Action: sts:AssumeRole
+      Policies:
+      - PolicyName: CodePipelinePolicy
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action:
+            - s3:GetObject
+            - s3:GetObjectVersion
+            - s3:PutObject
+            Resource: '*'
+          - Effect: Allow
+            Action:
+            - codebuild:StartBuild
+            - codebuild:BatchGetBuilds
+            Resource: '*'
+          - Effect: Allow
+            Action:
+            - codeconnections:UseConnection
+            - codestar-connections:UseConnection
+            Resource:
+            - arn:aws:codestar-connections:*:547323802553:connection/9b6d746e-cb84-4a72-b897-78b5c19c0100
+            - arn:aws:codeconnections:*:547323802553:connection/9b6d746e-cb84-4a72-b897-78b5c19c0100
+  CodePipelineArtifactsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName:
+        Ref: artifactsBucketName
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+  CodePipeline:
+    Type: AWS::CodePipeline::Pipeline
+    DependsOn: CodePipelineArtifactsBucket
+    Properties:
+      RoleArn:
+        Fn::GetAtt:
+        - CodePipelineServiceRole
+        - Arn
+      ArtifactStore:
+        Type: S3
+        Location:
+          Ref: artifactsBucketName
+      Stages:
+      - Name: Source
+        Actions:
+        - Name: SourceAction
+          ActionTypeId:
+            Category: Source
+            Owner: AWS
+            Provider: CodeStarSourceConnection
+            Version: '1'
+          OutputArtifacts:
+          - Name: SourceOutput
+          Configuration:
+            ConnectionArn: arn:aws:codeconnections:us-east-1:547323802553:connection/9b6d746e-cb84-4a72-b897-78b5c19c0100
+            FullRepositoryId: yassineBassi/my-api
+            BranchName: main
+      - Name: Build
+        Actions:
+        - Name: BuildAction
+          ActionTypeId:
+            Category: Build
+            Owner: AWS
+            Provider: CodeBuild
+            Version: '1'
+          InputArtifacts:
+          - Name: SourceOutput
+          OutputArtifacts:
+          - Name: BuildOutput
+          Configuration:
+            ProjectName:
+              Ref: codeBuildProject

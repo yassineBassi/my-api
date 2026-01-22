@@ -1,0 +1,59 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+
+Resources:  
+  NetworkStack:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      TemplateURL: ./network.yml
+      Parameters:
+        VpcCidr: 172.16.0.0/16
+        subnet1Cidrs: 172.16.0.0/24,172.16.1.0/24
+  
+  LoadBalancerStack:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      TemplateURL: ./load-balancer.yml
+      Parameters:
+        vpc: !GetAtt NetworkStack.Outputs.vpc
+        subnets: !GetAtt NetworkStack.Outputs.subnets
+
+  ECRRepositoryStack:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      TemplateURL: ./ecr-repo.yml
+      Parameters:
+        RepositoryName: my-ecr-repo
+
+  ECSClusterStack:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      TemplateURL: ./ecs-cluster.yml
+      Parameters:
+        vpc: !GetAtt NetworkStack.Outputs.vpc
+        ecsSubnets: !GetAtt NetworkStack.Outputs.subnets
+        loadBalancerSecurityGroup: !GetAtt LoadBalancerStack.Outputs.SecurityGoup
+        ProdTargetGroupArn: !GetAtt LoadBalancerStack.Outputs.ProdTargetGroup1Arn
+        defaultRepositoryName: 'my-api-ecr-draft'
+        ecrRepositoryName: my-ecr-repo
+
+  CodeBuildStack:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      TemplateURL: ./pipline/code-build.yml
+      Parameters:
+        artifactsBucketName: !Sub '${AWS::StackName}-artifacts-bucket-${AWS::Region}-${AWS::AccountId}'
+
+  CodePipelineStack:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      TemplateURL: ./pipline/code-pipeline.yml
+      Parameters:
+        codeBuildProject: !GetAtt CodeBuildStack.Outputs.CodeBuildProjectName
+        artifactsBucketName: !Sub '${AWS::StackName}-artifacts-bucket-${AWS::Region}-${AWS::AccountId}'
+        
+Outputs:
+  LoadBalancerDNSName:
+    Value: !GetAtt LoadBalancerStack.Outputs.LoadBalancerDNSName
+    Description: 'The DNS name of the load balancer'

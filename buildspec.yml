@@ -2,8 +2,8 @@ version: 0.2
 
 env: 
   variables:
-    IMAGE_NAME: my-api
-
+    IMAGE_NAME: my-ecr-repo
+  
 phases: 
   install:
     commands: 

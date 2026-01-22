@@ -1,0 +1,14 @@
+version = 0.1
+
+[default.deploy.parameters]
+stack_name = "my-api-2"
+resolve_s3 = true
+s3_prefix = "my-api"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND"
+image_repositories = []
+disable_rollback = true
+
+[default.global.parameters]
+region = "us-east-1"
+

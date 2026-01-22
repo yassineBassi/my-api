@@ -1,0 +1,105 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+
+Parameters:
+  vpc:
+    Type: String
+    Description: 'The VPC ID'
+  ecsSubnets:
+    Type: String
+    Description: 'A list of subnet IDs for the ECS service'
+  loadBalancerSecurityGroup:
+    Type: String
+    Description: 'The security group ID for the load balancer'
+  ProdTargetGroupArn:
+    Type: String
+    Description: 'The ARN of the production target group'
+  defaultRepositoryName:
+    Type: String
+    Description: 'The default ECR image name'
+  ecrRepositoryName:
+    Type: String
+    Description: 'The ECR repository name'
+
+Resources:
+
+  ################### ECS Cluster ###################
+  
+  ECSCluster:
+    Type: 'AWS::ECS::Cluster'
+    Properties:
+      ClusterName: 'my-ecs-cluster'
+      CapacityProviders:
+        - FARGATE
+
+ ################### ECS Service Security Group ###################
+  
+  ECSServiceSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: 'Security group for ECS service'
+      VpcId: !Ref vpc
+          
+  ECSServiceSecurityGroupIngress:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      GroupId: !Ref ECSServiceSecurityGroup
+      IpProtocol: tcp
+      FromPort: 3000
+      ToPort: 3000
+      SourceSecurityGroupId: !Ref loadBalancerSecurityGroup
+
+  ################### ECS Roles ###################
+
+  ECSTaskExecutionRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: 'sts:AssumeRole'
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+                
+  ################### ECS Task Definiton ###################
+
+  ECSTaskDefinition:
+    Type: 'AWS::ECS::TaskDefinition'
+    Properties:
+      Family: 'my-api'
+      Cpu: 256
+      Memory: 512
+      NetworkMode: awsvpc
+      ExecutionRoleArn: !Ref ECSTaskExecutionRole
+      RequiresCompatibilities:
+        - FARGATE
+      ContainerDefinitions:
+        - Name: 'my-api'
+          Image: !Sub '${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${defaultRepositoryName}:latest'
+          PortMappings:
+            - ContainerPort: 3000
+              Protocol: tcp
+
+  ECSService:
+    Type: 'AWS::ECS::Service'
+    Properties:
+      Cluster: !Ref ECSCluster
+      ServiceName: 'my-ecs-service'
+      TaskDefinition: !Ref ECSTaskDefinition
+      DesiredCount: 1
+      LaunchType: FARGATE
+      DeploymentController:
+        Type: CODE_DEPLOY
+      LoadBalancers:
+        - TargetGroupArn: !Ref ProdTargetGroupArn
+          ContainerName: 'my-api'
+          ContainerPort: 3000
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          Subnets: !Split [",", !Ref ecsSubnets]
+          SecurityGroups:
+            - !Ref ECSServiceSecurityGroup

@@ -1,0 +1,89 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Resources:
+  NetworkStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: NetworkStack/template.yaml
+      Parameters:
+        VpcCidr: 172.16.0.0/16
+        subnet1Cidrs: 172.16.0.0/24,172.16.1.0/24
+    Metadata:
+      SamResourceId: NetworkStack
+  LoadBalancerStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: LoadBalancerStack/template.yaml
+      Parameters:
+        vpc:
+          Fn::GetAtt:
+          - NetworkStack
+          - Outputs.vpc
+        subnets:
+          Fn::GetAtt:
+          - NetworkStack
+          - Outputs.subnets
+    Metadata:
+      SamResourceId: LoadBalancerStack
+  ECRRepositoryStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ECRRepositoryStack/template.yaml
+      Parameters:
+        RepositoryName: my-ecr-repo
+    Metadata:
+      SamResourceId: ECRRepositoryStack
+  ECSClusterStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ECSClusterStack/template.yaml
+      Parameters:
+        vpc:
+          Fn::GetAtt:
+          - NetworkStack
+          - Outputs.vpc
+        ecsSubnets:
+          Fn::GetAtt:
+          - NetworkStack
+          - Outputs.subnets
+        loadBalancerSecurityGroup:
+          Fn::GetAtt:
+          - LoadBalancerStack
+          - Outputs.SecurityGoup
+        ProdTargetGroupArn:
+          Fn::GetAtt:
+          - LoadBalancerStack
+          - Outputs.ProdTargetGroup1Arn
+        defaultRepositoryName: my-api-ecr-draft
+        ecrRepositoryName: my-ecr-repo
+    Metadata:
+      SamResourceId: ECSClusterStack
+  CodeBuildStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: CodeBuildStack/template.yaml
+      Parameters:
+        artifactsBucketName:
+          Fn::Sub: ${AWS::StackName}-artifacts-bucket-${AWS::Region}-${AWS::AccountId}
+    Metadata:
+      SamResourceId: CodeBuildStack
+  CodePipelineStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: CodePipelineStack/template.yaml
+      Parameters:
+        codeBuildProject:
+          Fn::GetAtt:
+          - CodeBuildStack
+          - Outputs.CodeBuildProjectName
+        artifactsBucketName:
+          Fn::Sub: ${AWS::StackName}-artifacts-bucket-${AWS::Region}-${AWS::AccountId}
+    Metadata:
+      SamResourceId: CodePipelineStack
+Outputs:
+  LoadBalancerDNSName:
+    Value:
+      Fn::GetAtt:
+      - LoadBalancerStack
+      - Outputs.LoadBalancerDNSName
+    Description: The DNS name of the load balancer
