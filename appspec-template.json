@@ -4,13 +4,13 @@
     {
       "TargetService": {
         "Type": "AWS::ECS::Service",
-	"Properties": {
-	  "TaskDefinition": "<TASK>",
-	  "LoadBalancerInfo": {
-	    "ContainerName": "my-api",
-	    "ContainerPort": 3000
-	  }
-	}
+        "Properties": {
+          "TaskDefinition": "<TASK>",
+          "LoadBalancerInfo": {
+            "ContainerName": "<CONTAINER>",
+            "ContainerPort": 3000
+          }
+        }
       }
     }
   ]

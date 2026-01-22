@@ -6,6 +6,9 @@ Parameters:
   artifactsBucketName:
     Type: String
     Description: "The name of the S3 bucket to store CodePipeline artifacts"
+  ecrRepositoryName:
+    Type: String
+    Description: "The name of the ECR repository"
 
 Resources:
 
@@ -42,12 +45,25 @@ Resources:
                     - "s3:GetBucketLocation"
                 Resource:
                   - !Sub "arn:aws:s3:::${artifactsBucketName}*"
+              - Effect: "Allow"
+                Action:
+                  - "ecr:GetAuthorizationToken"
+                Resource: "*"
+              - Effect: "Allow"
+                Action:
+                  - "ecr:BatchCheckLayerAvailability"
+                  - "ecr:CompleteLayerUpload"
+                  - "ecr:GetDownloadUrlForLayer"
+                  - "ecr:InitiateLayerUpload"
+                  - "ecr:PutImage"
+                  - "ecr:UploadLayerPart"
+                Resource: !Sub "arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/${ecrRepositoryName}"
 
   ################### CodeBuild Project ###################
   CodeBuildProject:
     Type: "AWS::CodeBuild::Project"
     Properties:
-      Name: "MyCodeApiBuildProject"
+      Name: "MyCodeBuildProject"
       Source:
         Type: "GITHUB"
         Location: "https://github.com/yassineBassi/my-api.git"

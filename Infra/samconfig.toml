@@ -1,7 +1,7 @@
 version = 0.1
 
 [default.deploy.parameters]
-stack_name = "my-api-2"
+stack_name = "my-api"
 resolve_s3 = true
 s3_prefix = "my-api"
 confirm_changeset = true

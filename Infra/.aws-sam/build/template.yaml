@@ -30,7 +30,7 @@ Resources:
     Properties:
       TemplateURL: ECRRepositoryStack/template.yaml
       Parameters:
-        RepositoryName: my-ecr-repo
+        RepositoryName: my-api
     Metadata:
       SamResourceId: ECRRepositoryStack
   ECSClusterStack:
@@ -55,7 +55,10 @@ Resources:
           - LoadBalancerStack
           - Outputs.ProdTargetGroup1Arn
         defaultRepositoryName: my-api-ecr-draft
-        ecrRepositoryName: my-ecr-repo
+        ecrRepositoryName:
+          Fn::GetAtt:
+          - ECRRepositoryStack
+          - Outputs.ECRRepositoryName
     Metadata:
       SamResourceId: ECSClusterStack
   CodeBuildStack:
@@ -65,6 +68,10 @@ Resources:
       Parameters:
         artifactsBucketName:
           Fn::Sub: ${AWS::StackName}-artifacts-bucket-${AWS::Region}-${AWS::AccountId}
+        ecrRepositoryName:
+          Fn::GetAtt:
+          - ECRRepositoryStack
+          - Outputs.ECRRepositoryName
     Metadata:
       SamResourceId: CodeBuildStack
   CodePipelineStack:

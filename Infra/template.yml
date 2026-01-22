@@ -24,7 +24,7 @@ Resources:
     Properties:
       TemplateURL: ./ecr-repo.yml
       Parameters:
-        RepositoryName: my-ecr-repo
+        RepositoryName: my-api
 
   ECSClusterStack:
     Type: 'AWS::CloudFormation::Stack'
@@ -36,7 +36,7 @@ Resources:
         loadBalancerSecurityGroup: !GetAtt LoadBalancerStack.Outputs.SecurityGoup
         ProdTargetGroupArn: !GetAtt LoadBalancerStack.Outputs.ProdTargetGroup1Arn
         defaultRepositoryName: 'my-api-ecr-draft'
-        ecrRepositoryName: my-ecr-repo
+        ecrRepositoryName: !GetAtt ECRRepositoryStack.Outputs.ECRRepositoryName
 
   CodeBuildStack:
     Type: 'AWS::CloudFormation::Stack'
@@ -44,6 +44,7 @@ Resources:
       TemplateURL: ./pipline/code-build.yml
       Parameters:
         artifactsBucketName: !Sub '${AWS::StackName}-artifacts-bucket-${AWS::Region}-${AWS::AccountId}'
+        ecrRepositoryName: !GetAtt ECRRepositoryStack.Outputs.ECRRepositoryName
 
   CodePipelineStack:
     Type: 'AWS::CloudFormation::Stack'
