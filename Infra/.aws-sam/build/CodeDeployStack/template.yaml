@@ -64,7 +64,7 @@ Resources:
         Fn::GetAtt:
         - CodeDeployServiceRole
         - Arn
-      DeploymentConfigName: CodeDeployDefault.ECSCanary10Percent5Minutes
+      DeploymentConfigName: CodeDeployDefault.ECSCanary10Percent15Minutes
       DeploymentStyle:
         DeploymentType: BLUE_GREEN
         DeploymentOption: WITH_TRAFFIC_CONTROL

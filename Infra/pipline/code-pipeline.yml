@@ -67,7 +67,7 @@ Resources:
                 Resource: !Sub  "arn:aws:codedeploy:${AWS::Region}:${AWS::AccountId}:deploymentgroup:${codeDeoloyApplicationName}/${codeDeployDeploymentGroupName}"
               - Effect: "Allow"
                 Action: "codedeploy:GetDeploymentConfig"
-                Resource: "arn:aws:codedeploy:us-east-1:547323802553:deploymentconfig:CodeDeployDefault.ECSCanary10Percent5Minutes"
+                Resource: "arn:aws:codedeploy:us-east-1:547323802553:deploymentconfig:CodeDeployDefault.ECSCanary10Percent15Minutes"
 
   ################### CodePipeline Pipeline ###################
   CodePipeline:
