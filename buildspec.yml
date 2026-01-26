@@ -45,7 +45,7 @@ phases:
       - echo "Create task definition revision"
       - TASK_EXECUTION_ROLE=$(aws ecs describe-task-definition --task-definition $TASK_NAME --query 'taskDefinition.executionRoleArn' --output text)
       - cp task-def-template.json task-def.json
-      - sed -i "s|<IMAGE_URL>|$IMAGE_URI:latest|g" task-def.json
+      - sed -i "s|<IMAGE_NAME>|$IMAGE_URI:latest|g" task-def.json
       - sed -i "s|<CONTAINER>|$IMAGE_NAME|g" task-def.json
       - sed -i "s|<TASK_ROLE>|$TASK_EXECUTION_ROLE|g" task-def.json
       - cat task-def.json
