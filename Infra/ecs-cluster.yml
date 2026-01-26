@@ -11,7 +11,7 @@ Parameters:
   loadBalancerSecurityGroup:
     Type: String
     Description: 'The security group ID for the load balancer'
-  ProdTargetGroupArn:
+  prodTargetGroupArn:
     Type: String
     Description: 'The ARN of the production target group'
   defaultRepositoryName:
@@ -20,6 +20,9 @@ Parameters:
   ecrRepositoryName:
     Type: String
     Description: 'The ECR repository name'
+  taskName:
+    Type: String
+    Description: 'The name of the ECS task definition'
 
 Resources:
 
@@ -69,7 +72,7 @@ Resources:
   ECSTaskDefinition:
     Type: 'AWS::ECS::TaskDefinition'
     Properties:
-      Family: 'my-api'
+      Family: !Ref taskName
       Cpu: 256
       Memory: 512
       NetworkMode: awsvpc
@@ -77,7 +80,7 @@ Resources:
       RequiresCompatibilities:
         - FARGATE
       ContainerDefinitions:
-        - Name: 'my-api'
+        - Name: !Ref ecrRepositoryName
           Image: !Sub '${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${defaultRepositoryName}:latest'
           PortMappings:
             - ContainerPort: 3000
@@ -94,7 +97,7 @@ Resources:
       DeploymentController:
         Type: CODE_DEPLOY
       LoadBalancers:
-        - TargetGroupArn: !Ref ProdTargetGroupArn
+        - TargetGroupArn: !Ref prodTargetGroupArn
           ContainerName: 'my-api'
           ContainerPort: 3000
       NetworkConfiguration:
@@ -103,3 +106,11 @@ Resources:
           Subnets: !Split [",", !Ref ecsSubnets]
           SecurityGroups:
             - !Ref ECSServiceSecurityGroup
+
+Outputs:
+  ECSClusterName:
+    Description: 'The name of the ECS cluster'
+    Value: !Ref ECSCluster
+  ECSServiceName:
+    Description: 'The name of the ECS service'
+    Value: !GetAtt ECSService.Name

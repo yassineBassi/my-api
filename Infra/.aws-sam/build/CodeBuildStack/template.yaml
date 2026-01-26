@@ -7,6 +7,9 @@ Parameters:
   ecrRepositoryName:
     Type: String
     Description: The name of the ECR repository
+  ecsTaskName:
+    Type: String
+    Description: The name of the ECS task definition
 Resources:
   CodeBuildServiceRole:
     Type: AWS::IAM::Role
@@ -54,6 +57,10 @@ Resources:
             - ecr:UploadLayerPart
             Resource:
               Fn::Sub: arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/${ecrRepositoryName}
+          - Effect: Allow
+            Action: ecs:RegisterTaskDefinition
+            Resource:
+              Fn::Sub: arn:aws:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${ecsTaskName}*
   CodeBuildProject:
     Type: AWS::CodeBuild::Project
     Properties:

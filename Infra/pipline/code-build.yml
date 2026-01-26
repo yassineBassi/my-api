@@ -9,6 +9,9 @@ Parameters:
   ecrRepositoryName:
     Type: String
     Description: "The name of the ECR repository"
+  ecsTaskName: 
+    Type: String
+    Description: "The name of the ECS task definition"
 
 Resources:
 
@@ -58,6 +61,9 @@ Resources:
                   - "ecr:PutImage"
                   - "ecr:UploadLayerPart"
                 Resource: !Sub "arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/${ecrRepositoryName}"
+              - Effect: "Allow"
+                Action: "ecs:RegisterTaskDefinition"
+                Resource: !Sub "arn:aws:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${ecsTaskName}*"
 
   ################### CodeBuild Project ###################
   CodeBuildProject:

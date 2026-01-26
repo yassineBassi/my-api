@@ -1,13 +1,36 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
+Parameters:
+  ecrRepositoryName:
+    Type: String
+    Description: The name of the ECR repository
+  taskName:
+    Type: String
+    Description: The name of the ECS task definition
+  defaultRepositoryName:
+    Type: String
+    Description: The default ECR image name
+  vpcCidr:
+    Type: String
+    Description: The CIDR block for the VPC
+  subnet1Cidrs:
+    Type: String
+    Description: A comma-separated list of CIDR blocks for subnet 1
+  gitConnectionId:
+    Type: String
+    Description: The Git connection ID
 Resources:
   NetworkStack:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: NetworkStack/template.yaml
       Parameters:
-        VpcCidr: 172.16.0.0/16
-        subnet1Cidrs: 172.16.0.0/24,172.16.1.0/24
+        vpcCidr:
+          Ref: vpcCidr
+        subnet1Cidrs:
+          Ref: subnet1Cidrs
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
     Metadata:
       SamResourceId: NetworkStack
   LoadBalancerStack:
@@ -23,6 +46,8 @@ Resources:
           Fn::GetAtt:
           - NetworkStack
           - Outputs.subnets
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
     Metadata:
       SamResourceId: LoadBalancerStack
   ECRRepositoryStack:
@@ -30,7 +55,10 @@ Resources:
     Properties:
       TemplateURL: ECRRepositoryStack/template.yaml
       Parameters:
-        RepositoryName: my-api
+        RepositoryName:
+          Ref: ecrRepositoryName
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
     Metadata:
       SamResourceId: ECRRepositoryStack
   ECSClusterStack:
@@ -50,15 +78,18 @@ Resources:
           Fn::GetAtt:
           - LoadBalancerStack
           - Outputs.SecurityGoup
-        ProdTargetGroupArn:
+        prodTargetGroupArn:
           Fn::GetAtt:
           - LoadBalancerStack
-          - Outputs.ProdTargetGroup1Arn
-        defaultRepositoryName: my-api-ecr-draft
+          - Outputs.ProdTargetGroupArn
+        defaultRepositoryName:
+          Ref: defaultRepositoryName
         ecrRepositoryName:
-          Fn::GetAtt:
-          - ECRRepositoryStack
-          - Outputs.ECRRepositoryName
+          Ref: ecrRepositoryName
+        taskName:
+          Ref: taskName
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
     Metadata:
       SamResourceId: ECSClusterStack
   CodeBuildStack:
@@ -69,11 +100,57 @@ Resources:
         artifactsBucketName:
           Fn::Sub: ${AWS::StackName}-artifacts-bucket-${AWS::Region}-${AWS::AccountId}
         ecrRepositoryName:
-          Fn::GetAtt:
-          - ECRRepositoryStack
-          - Outputs.ECRRepositoryName
+          Ref: ecrRepositoryName
+        ecsTaskName:
+          Ref: taskName
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
     Metadata:
       SamResourceId: CodeBuildStack
+  ArtifactsBucketStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ArtifactsBucketStack/template.yaml
+      Parameters:
+        artifactsBucketName:
+          Fn::Sub: ${AWS::StackName}-artifacts-bucket-${AWS::Region}-${AWS::AccountId}
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Metadata:
+      SamResourceId: ArtifactsBucketStack
+  CodeDeployStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: CodeDeployStack/template.yaml
+      Parameters:
+        ECSClusterName:
+          Fn::GetAtt:
+          - ECSClusterStack
+          - Outputs.ECSClusterName
+        ECSServiceName:
+          Fn::GetAtt:
+          - ECSClusterStack
+          - Outputs.ECSServiceName
+        ProdTargetGroupName:
+          Fn::GetAtt:
+          - LoadBalancerStack
+          - Outputs.ProdTargetGroupName
+        TestTargetGroupName:
+          Fn::GetAtt:
+          - LoadBalancerStack
+          - Outputs.TestTargetGroupName
+        ProdListenerArn:
+          Fn::GetAtt:
+          - LoadBalancerStack
+          - Outputs.ProdListenerArn
+        TestListenerArn:
+          Fn::GetAtt:
+          - LoadBalancerStack
+          - Outputs.TestListenerArn
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Metadata:
+      SamResourceId: CodeDeployStack
   CodePipelineStack:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -84,7 +161,21 @@ Resources:
           - CodeBuildStack
           - Outputs.CodeBuildProjectName
         artifactsBucketName:
-          Fn::Sub: ${AWS::StackName}-artifacts-bucket-${AWS::Region}-${AWS::AccountId}
+          Fn::GetAtt:
+          - ArtifactsBucketStack
+          - Outputs.ArtifactsBucketName
+        codeDeoloyApplicationName:
+          Fn::GetAtt:
+          - CodeDeployStack
+          - Outputs.CodeDeployApplicationName
+        codeDeployDeploymentGroupName:
+          Fn::GetAtt:
+          - CodeDeployStack
+          - Outputs.CodeDeployDeploymentGroupName
+        gitConnectionId:
+          Ref: gitConnectionId
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
     Metadata:
       SamResourceId: CodePipelineStack
 Outputs:

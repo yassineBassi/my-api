@@ -3,7 +3,7 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
 
 Parameters: 
-  VpcCidr:
+  vpcCidr:
     Type: String
   subnet1Cidrs:
     Type: List<String>
@@ -13,7 +13,7 @@ Resources:
   VPC:
     Type: 'AWS::EC2::VPC'
     Properties:
-      CidrBlock: !Ref VpcCidr
+      CidrBlock: !Ref vpcCidr
       EnableDnsSupport: true
       EnableDnsHostnames: true
       Tags:

@@ -10,7 +10,7 @@ Parameters:
   loadBalancerSecurityGroup:
     Type: String
     Description: The security group ID for the load balancer
-  ProdTargetGroupArn:
+  prodTargetGroupArn:
     Type: String
     Description: The ARN of the production target group
   defaultRepositoryName:
@@ -19,6 +19,9 @@ Parameters:
   ecrRepositoryName:
     Type: String
     Description: The ECR repository name
+  taskName:
+    Type: String
+    Description: The name of the ECS task definition
 Resources:
   ECSCluster:
     Type: AWS::ECS::Cluster
@@ -57,7 +60,8 @@ Resources:
   ECSTaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
-      Family: my-api
+      Family:
+        Ref: taskName
       Cpu: 256
       Memory: 512
       NetworkMode: awsvpc
@@ -66,7 +70,8 @@ Resources:
       RequiresCompatibilities:
       - FARGATE
       ContainerDefinitions:
-      - Name: my-api
+      - Name:
+          Ref: ecrRepositoryName
         Image:
           Fn::Sub: ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${defaultRepositoryName}:latest
         PortMappings:
@@ -86,7 +91,7 @@ Resources:
         Type: CODE_DEPLOY
       LoadBalancers:
       - TargetGroupArn:
-          Ref: ProdTargetGroupArn
+          Ref: prodTargetGroupArn
         ContainerName: my-api
         ContainerPort: 3000
       NetworkConfiguration:
@@ -98,3 +103,14 @@ Resources:
             - Ref: ecsSubnets
           SecurityGroups:
           - Ref: ECSServiceSecurityGroup
+Outputs:
+  ECSClusterName:
+    Description: The name of the ECS cluster
+    Value:
+      Ref: ECSCluster
+  ECSServiceName:
+    Description: The name of the ECS service
+    Value:
+      Fn::GetAtt:
+      - ECSService
+      - Name

@@ -10,14 +10,4 @@ Resources:
     Properties:
       RepositoryName:
         Ref: RepositoryName
-Outputs:
-  ECRRepositoryUri:
-    Description: URI of the ECR repository
-    Value:
-      Fn::GetAtt:
-      - ECRRepo
-      - RepositoryUri
-  ECRRepositoryName:
-    Description: Name of the ECR repository
-    Value:
-      Ref: RepositoryName
+    DeletionPolicy: Delete

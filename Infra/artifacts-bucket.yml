@@ -1,0 +1,74 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: "AWS::Serverless-2016-10-31" 
+
+Parameters:
+  artifactsBucketName:
+    Type: String
+    Description: "The name of the S3 bucket to store artifacts"
+
+Resources:
+  ArtifactsBucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: !Ref artifactsBucketName
+      VersioningConfiguration:
+        Status: "Enabled"
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: True
+        BlockPublicPolicy: True
+        IgnorePublicAcls: True
+        RestrictPublicBuckets: True
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+
+  EmptyS3BucketFnExecutionRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Policies:
+        - PolicyName: "EmptyBucketPolicy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "s3:ListBucket"
+                  - "s3:DeleteObject"
+                Resource: 
+                  - !Sub "arn:aws:s3:::${artifactsBucketName}"
+                  - !Sub "arn:aws:s3:::${artifactsBucketName}/*"
+              - Effect: "Allow"
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource: "*"
+
+  EmptyS3BucketFn:
+    Type: "AWS::Serverless::Function"
+    Properties:
+      Handler: "index.handler"
+      Role: !GetAtt EmptyS3BucketFnExecutionRole.Arn
+      Runtime: "nodejs24.x"
+      Timeout: 300
+      CodeUri: "./empty-bucket-fn"
+          
+  EmptyS3BucketCustomResource:
+    Type: "Custom::EmptyS3Bucket"
+    Properties:
+      ServiceToken: !GetAtt EmptyS3BucketFn.Arn
+      bucket_name: !Ref artifactsBucketName
+    DependsOn: ArtifactsBucket
+
+Outputs:
+  ArtifactsBucketName:
+    Description: "The name of the artifacts S3 bucket"
+    Value: !Ref ArtifactsBucket

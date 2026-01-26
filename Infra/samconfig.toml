@@ -8,6 +8,14 @@ confirm_changeset = true
 capabilities = "CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND"
 image_repositories = []
 disable_rollback = true
+parameter_overrides = [
+    "ecrRepositoryName=my-api",
+    "taskName=my-api-task",
+    "defaultRepositoryName=my-api-ecr-draft",
+    "vpcCidr=172.16.0.0/16",
+    "subnet1Cidrs=172.16.0.0/24,172.16.1.0/24",
+    "gitConnectionId=9b6d746e-cb84-4a72-b897-78b5c19c0100"
+]
 
 [default.global.parameters]
 region = "us-east-1"

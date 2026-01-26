@@ -107,6 +107,18 @@ Outputs:
   LoadBalancerDNSName:
     Value: !GetAtt LoadBalancer.DNSName
     Description: 'The DNS name of the load balancer'
-  ProdTargetGroup1Arn:
+  ProdTargetGroupArn:
     Value: !Ref TargetGroup1
     Description: 'The ARN of the production target group'
+  ProdTargetGroupName:
+    Value: !GetAtt TargetGroup1.TargetGroupName
+    Description: 'The name of the production target group'
+  TestTargetGroupName:
+    Value: !GetAtt TargetGroup2.TargetGroupName
+    Description: 'The name of the production target group'
+  ProdListenerArn:
+    Value: !Ref ProdListener
+    Description: 'The ARN of the production listener'
+  TestListenerArn:
+    Value: !Ref TestListener
+    Description: 'The ARN of the test listener'

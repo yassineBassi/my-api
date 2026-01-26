@@ -1,0 +1,100 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: "AWS::Serverless-2016-10-31"
+
+Parameters:
+  ECSClusterName:
+    Type: String
+    Description: 'The name of the ECS cluster'
+  ECSServiceName:
+    Type: String
+    Description: 'The name of the ECS service'
+  ProdTargetGroupName:
+    Type: String
+    Description: 'The ARN of the production target group 1'
+  TestTargetGroupName:
+    Type: String
+    Description: 'The ARN of the test target group 1'
+  ProdListenerArn:
+    Type: String
+    Description: 'The ARN of the production listener'
+  TestListenerArn:
+    Type: String
+    Description: 'The ARN of the test listener'
+
+Resources:
+  CodeDeployApplication:
+    Type: "AWS::CodeDeploy::Application"
+    Properties:
+      ComputePlatform: ECS
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+
+  CodeDeployServiceRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "codedeploy.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/AWSCodeDeployRoleForECS"
+      Policies:
+        - PolicyName: AWSCodeDeployServiceRolePolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action: "ecs:DescribeServices"
+                Resource: "arn:aws:ecs:us-east-1:547323802553:service/my-ecs-cluster/my-ecs-service"
+
+  CodeDeployDeploymentGroup:
+    Type: "AWS::CodeDeploy::DeploymentGroup"
+    Properties:
+      ApplicationName: !Ref CodeDeployApplication
+      ServiceRoleArn: !GetAtt CodeDeployServiceRole.Arn
+      DeploymentConfigName: CodeDeployDefault.ECSCanary10Percent15Minutes
+      DeploymentStyle:
+        DeploymentType: BLUE_GREEN
+        DeploymentOption: WITH_TRAFFIC_CONTROL
+      BlueGreenDeploymentConfiguration:
+        TerminateBlueInstancesOnDeploymentSuccess:
+          Action: TERMINATE
+          TerminationWaitTimeInMinutes: 5
+        DeploymentReadyOption:
+          ActionOnTimeout: STOP_DEPLOYMENT
+          WaitTimeInMinutes: 10
+      ECSServices:
+        - ClusterName: !Ref ECSClusterName
+          ServiceName: !Ref ECSServiceName
+      LoadBalancerInfo:
+        TargetGroupPairInfoList:
+          - TargetGroups:
+              - Name: !Ref ProdTargetGroupName
+              - Name: !Ref TestTargetGroupName
+            ProdTrafficRoute:
+              ListenerArns:
+                - !Ref ProdListenerArn
+            TestTrafficRoute:
+              ListenerArns:
+                - !Ref TestListenerArn
+
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    
+Outputs:
+  CodeDeployApplicationName:
+    Description: 'The name of the CodeDeploy application'
+    Value: !Ref CodeDeployApplication
+    Export:
+      Name: !Sub '${AWS::StackName}-CodeDeployApplicationName'
+
+  CodeDeployDeploymentGroupName:
+    Description: 'The name of the CodeDeploy deployment group'
+    Value: !Ref CodeDeployDeploymentGroup
+    Export:
+      Name: !Sub '${AWS::StackName}-CodeDeployDeploymentGroupName'
