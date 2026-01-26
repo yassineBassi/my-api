@@ -2,8 +2,8 @@
     "family": "my-api-task",
     "containerDefinitions": [
         {
-            "name": "<IMAGE_NAME>",
-            "image": "<CONTAINER>",
+            "name": "<CONTAINER_NAME>",
+            "image": "<IMAGE>",
             "portMappings": [
                 {
                     "containerPort": 3000
