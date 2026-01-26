@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus  } from '@nestjs/common';
 
 @Injectable()
 export class AppService {
@@ -7,6 +7,7 @@ export class AppService {
   }
 
   healthCheck(): string {
+    throw HttpException("error", HttpStatus.INTERNAL_SERVER_ERROR)
     return '<h1>Hello World! this is version 4 !!!!</h1>';
   }
 }
