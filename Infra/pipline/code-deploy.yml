@@ -52,12 +52,20 @@ Resources:
                 Action: "ecs:DescribeServices"
                 Resource: "arn:aws:ecs:us-east-1:547323802553:service/my-ecs-cluster/my-ecs-service"
 
+  DeploymentNotificationSNS:
+    Type: "AWS::SNS::Topic"
+    Properties:
+      TopicName: "my-sns-topic"
+      Subscription:
+        - Protocol: "email"
+          Endpoint: "yassinebassii@gmail.com"
+
   CodeDeployDeploymentGroup:
     Type: "AWS::CodeDeploy::DeploymentGroup"
     Properties:
       ApplicationName: !Ref CodeDeployApplication
       ServiceRoleArn: !GetAtt CodeDeployServiceRole.Arn
-      DeploymentConfigName: CodeDeployDefault.ECSCanary10Percent15Minutes
+      DeploymentConfigName: CodeDeployDefault.ECSCanary10Percent5Minutes
       DeploymentStyle:
         DeploymentType: BLUE_GREEN
         DeploymentOption: WITH_TRAFFIC_CONTROL
@@ -82,6 +90,16 @@ Resources:
             TestTrafficRoute:
               ListenerArns:
                 - !Ref TestListenerArn
+      TriggerConfigurations:
+        - TriggerEvents:
+            - DeploymentStart
+            - DeploymentSuccess
+            - DeploymentFailure
+            - DeploymentStop
+            - DeploymentRollback
+            - DeploymentReady
+          TriggerName: "ECS-Deployment-Success-Trigger"
+          TriggerTargetArn: !GetAtt DeploymentNotificationSNS.TopicArn
 
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete

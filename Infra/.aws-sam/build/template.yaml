@@ -50,17 +50,6 @@ Resources:
     UpdateReplacePolicy: Delete
     Metadata:
       SamResourceId: LoadBalancerStack
-  ECRRepositoryStack:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: ECRRepositoryStack/template.yaml
-      Parameters:
-        RepositoryName:
-          Ref: ecrRepositoryName
-    DeletionPolicy: Delete
-    UpdateReplacePolicy: Delete
-    Metadata:
-      SamResourceId: ECRRepositoryStack
   ECSClusterStack:
     Type: AWS::CloudFormation::Stack
     Properties:

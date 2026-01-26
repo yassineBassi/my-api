@@ -23,7 +23,7 @@ Resources:
       TargetType: ip
 
       HealthCheckIntervalSeconds: 30
-      HealthCheckPath: /health
+      HealthCheckPath: /
       HealthCheckPort: '3000'
       HealthCheckProtocol: HTTP
       HealthCheckTimeoutSeconds: 5
@@ -43,7 +43,7 @@ Resources:
       TargetType: ip
 
       HealthCheckIntervalSeconds: 30
-      HealthCheckPath: /health
+      HealthCheckPath: /
       HealthCheckPort: '3000'
       HealthCheckProtocol: HTTP
       HealthCheckTimeoutSeconds: 5

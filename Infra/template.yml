@@ -42,16 +42,7 @@ Resources:
         subnets: !GetAtt NetworkStack.Outputs.subnets
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
-
-  ECRRepositoryStack:
-    Type: 'AWS::CloudFormation::Stack'
-    Properties:
-      TemplateURL: ./ecr-repo.yml
-      Parameters:
-        RepositoryName: !Ref ecrRepositoryName
-    DeletionPolicy: Delete
-    UpdateReplacePolicy: Delete
-
+    
   ECSClusterStack:
     Type: 'AWS::CloudFormation::Stack'
     Properties:
