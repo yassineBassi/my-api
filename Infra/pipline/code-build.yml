@@ -65,8 +65,14 @@ Resources:
                   - "ecr:UploadLayerPart"
                 Resource: !Sub "arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/${ecrRepositoryName}"
               - Effect: "Allow"
-                Action: "ecs:RegisterTaskDefinition"
+                Action: 
+                  - "ecs:RegisterTaskDefinition"
+                  - "ecs:DescribeTaskDefinition"
                 Resource: !Sub "arn:aws:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${ecsTaskName}*"
+              - Effect: "Allow"
+                Action: 
+                  - "ecs:DescribeTaskDefinition"
+                Resource: "*"
               - Effect: "Allow"
                 Action: "iam:PassRole"
                 Resource: !Sub "arn:aws:iam::${AWS::AccountId}:role/${ecsTaskExecutionRoleName}"
