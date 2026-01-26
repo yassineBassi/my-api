@@ -10,6 +10,9 @@ Parameters:
   ecsTaskName:
     Type: String
     Description: The name of the ECS task definition
+  ecsTaskExecutionRole:
+    Type: String
+    Description: The name of the ECS task execution role
 Resources:
   CodeBuildServiceRole:
     Type: AWS::IAM::Role
@@ -61,6 +64,10 @@ Resources:
             Action: ecs:RegisterTaskDefinition
             Resource:
               Fn::Sub: arn:aws:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${ecsTaskName}*
+          - Effect: Allow
+            Action: iam:PassRole
+            Resource:
+              Fn::Sub: arn:aws:iam::${AWS::AccountId}:role/${ecsTaskExecutionRole}
   CodeBuildProject:
     Type: AWS::CodeBuild::Project
     Properties:

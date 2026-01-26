@@ -114,3 +114,7 @@ Outputs:
       Fn::GetAtt:
       - ECSService
       - Name
+  ecsTaskExecutionRole:
+    Description: The ECS task execution role
+    Value:
+      Ref: ECSTaskExecutionRole

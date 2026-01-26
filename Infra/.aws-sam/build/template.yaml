@@ -103,6 +103,10 @@ Resources:
           Ref: ecrRepositoryName
         ecsTaskName:
           Ref: taskName
+        ecsTaskExecutionRole:
+          Fn::GetAtt:
+          - ECSClusterStack
+          - Outputs.ecsTaskExecutionRole
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
     Metadata:
