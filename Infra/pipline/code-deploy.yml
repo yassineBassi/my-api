@@ -82,6 +82,8 @@ Resources:
             TestTrafficRoute:
               ListenerArns:
                 - !Ref TestListenerArn
+      AlarmConfiguration:
+      
 
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
