@@ -3,7 +3,7 @@ version: 0.2
 env: 
   variables:
     IMAGE_NAME: my-api
-    TASK_ROLE_NAME: ECSTaskExecutionRole
+    TASK_NAME: my-api-task
   
 phases: 
   install:
@@ -43,14 +43,15 @@ phases:
       - docker push $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_NAME:latest
 
       - echo "Create task definition revision"
+      - TASK_EXECUTION_ROLE=$(aws ecs describe-task-definition --task-definition $TASK_NAME --query 'taskDefinition.executionRoleArn')
       - cp task-def-template.json task-def.json
       - sed -i "s|<IMAGE_URL>|$IMAGE_URI:latest|g" task-def.json
       - sed -i "s|<CONTAINER>|$IMAGE_NAME|g" task-def.json
-      - sed -i "s|<TASK_ROLE>|$TASK_ROLE_NAME|g" task-def.json
-      - TASK_ARN=$(aws ecs register-task-definition --cli-input-json file://task-def.json | jq -r '.taskDefinition.taskDefinitionArn')
-      - echo $TASK_ARN
+      - sed -i "s|<TASK_ROLE>|$TASK_EXECUTION_ROLE|g" task-def.json
+
 
       - echo "Create appspec file for deployment"
+      - TASK_ARN=$(aws ecs register-task-definition --cli-input-json file://task-def.json | jq -r '.taskDefinition.taskDefinitionArn')
       - cp appspec-template.json appspec.json
       - sed -i "s|<TASK>|$TASK_ARN|g" appspec.json 
       - sed -i "s|<CONTAINER>|$IMAGE_NAME|g" appspec.json

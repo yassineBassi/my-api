@@ -114,6 +114,6 @@ Outputs:
   ECSServiceName:
     Description: 'The name of the ECS service'
     Value: !GetAtt ECSService.Name
-  ecsTaskExecutionRole:
+  ecsTaskExecutionRoleName:
     Description: 'The ECS task execution role'
     Value: !Ref ECSTaskExecutionRole

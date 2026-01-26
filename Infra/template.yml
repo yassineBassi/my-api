@@ -75,7 +75,7 @@ Resources:
         artifactsBucketName: !Sub '${AWS::StackName}-artifacts-bucket-${AWS::Region}-${AWS::AccountId}'
         ecrRepositoryName: !Ref ecrRepositoryName
         ecsTaskName: !Ref taskName
-        ecsTaskExecutionRole: !GetAtt ECSClusterStack.Outputs.ecsTaskExecutionRole
+        ecsTaskExecutionRoleName: !GetAtt ECSClusterStack.Outputs.ecsTaskExecutionRoleName
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
 
