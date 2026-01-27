@@ -17,7 +17,11 @@
                     "awslogs-region": "us-east-1",
                     "awslogs-stream-prefix": "ecs"
                 }
-            }
+            },
+            "environment": [
+                { "name": "NODE_ENV", "value": "production" },
+                { "name": "NO_COLOR", "value": "1" }
+            ]
 	}
     ],
     "executionRoleArn": "<TASK_ROLE>",
