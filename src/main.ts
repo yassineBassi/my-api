@@ -3,6 +3,8 @@ import { AppModule } from './app.module';
 import { LoggingInterceptor } from './interceptor/Logging.interceptor';
 import { AllExceptionsFilter } from './interceptor/all-exception-filter';
 
+process.env.NO_COLOR = 'true';
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     bufferLogs: true,

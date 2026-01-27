@@ -21,6 +21,9 @@ Parameters:
   gitConnectionId: 
     Type: String
     Description: 'The Git connection ID'
+  notificationEmail:
+    Type: String
+    Description: 'The email address to send notifications to'
 
 Resources:  
   NetworkStack:
@@ -42,7 +45,7 @@ Resources:
         subnets: !GetAtt NetworkStack.Outputs.subnets
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
-    
+
   ECSClusterStack:
     Type: 'AWS::CloudFormation::Stack'
     Properties:
@@ -55,6 +58,7 @@ Resources:
         defaultRepositoryName: !Ref defaultRepositoryName
         ecrRepositoryName: !Ref ecrRepositoryName
         taskName: !Ref taskName
+        notificationEmail: !Ref notificationEmail
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
 
@@ -90,6 +94,7 @@ Resources:
         TestTargetGroupName: !GetAtt LoadBalancerStack.Outputs.TestTargetGroupName
         ProdListenerArn: !GetAtt LoadBalancerStack.Outputs.ProdListenerArn
         TestListenerArn: !GetAtt LoadBalancerStack.Outputs.TestListenerArn
+        notificationEmail: !Ref notificationEmail
     DeletionPolicy:  Delete
     UpdateReplacePolicy: Delete
 

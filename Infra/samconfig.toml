@@ -14,7 +14,8 @@ parameter_overrides = [
     "defaultRepositoryName=my-api-ecr-draft",
     "vpcCidr=172.16.0.0/16",
     "subnet1Cidrs=172.16.0.0/24,172.16.1.0/24",
-    "gitConnectionId=9b6d746e-cb84-4a72-b897-78b5c19c0100"
+    "gitConnectionId=9b6d746e-cb84-4a72-b897-78b5c19c0100",
+    "notificationEmail=yassinebassii@gmail.com"
 ]
 
 [default.global.parameters]

@@ -19,6 +19,9 @@ Parameters:
   gitConnectionId:
     Type: String
     Description: The Git connection ID
+  notificationEmail:
+    Type: String
+    Description: The email address to send notifications to
 Resources:
   NetworkStack:
     Type: AWS::CloudFormation::Stack
@@ -77,6 +80,8 @@ Resources:
           Ref: ecrRepositoryName
         taskName:
           Ref: taskName
+        notificationEmail:
+          Ref: notificationEmail
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
     Metadata:
@@ -140,6 +145,8 @@ Resources:
           Fn::GetAtt:
           - LoadBalancerStack
           - Outputs.TestListenerArn
+        notificationEmail:
+          Ref: notificationEmail
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
     Metadata:

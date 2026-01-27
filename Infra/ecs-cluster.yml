@@ -23,9 +23,12 @@ Parameters:
   taskName:
     Type: String
     Description: 'The name of the ECS task definition'
+  notificationEmail:
+    Type: String
+    Description: 'Email address for CloudWatch alarms'
+
 
 Resources:
-
   ################### ECS Cluster ###################
   
   ECSCluster:
@@ -66,8 +69,9 @@ Resources:
             Action: 'sts:AssumeRole'
       ManagedPolicyArns:
       - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
-                
-  ################### ECS Task Definiton ###################
+
+  #################### ECS Logs + Alarms ###################        
+  
   ECSTaskLogGroup:
     Type: 'AWS::Logs::LogGroup'
     Properties:
@@ -76,6 +80,42 @@ Resources:
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
 
+  LogFilterMetric:
+    Type: 'AWS::Logs::MetricFilter'
+    Properties:
+      FilterPattern: '%\[ERROR\] 500%'
+      LogGroupName: !Ref ECSTaskLogGroup
+      MetricTransformations:
+        - MetricName: !Sub '${taskName}500Count'
+          MetricNamespace: 'Logs'
+          MetricValue: 1
+  
+  AlarmTopic:
+    Type: 'AWS::SNS::Topic'
+    Properties:
+      TopicName: !Sub '${taskName}-alarm-topic'
+      Subscription:
+        - Protocol: email
+          Endpoint: !Ref notificationEmail
+
+  LogFilterMetricAlarm:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      AlarmName: !Sub '${taskName}500Count'
+      ComparisonOperator: GreaterThanThreshold
+      EvaluationPeriods: 1
+      MetricName: 'myApi500Count'
+      Namespace: 'My-api'
+      Period: 60
+      Statistic: Sum
+      Threshold: 5
+      ActionsEnabled: true
+      AlarmActions:
+        - !GetAtt AlarmTopic.TopicArn
+      AlarmDescription: 'Alarm when 500 errors exceed threshold'
+      TreatMissingData: notBreaching
+
+  ################### ECS Task Definiton ###################
   ECSTaskDefinition:
     Type: 'AWS::ECS::TaskDefinition'
     Properties:

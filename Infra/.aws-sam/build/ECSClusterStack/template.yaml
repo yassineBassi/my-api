@@ -22,6 +22,9 @@ Parameters:
   taskName:
     Type: String
     Description: The name of the ECS task definition
+  notificationEmail:
+    Type: String
+    Description: Email address for CloudWatch alarms
 Resources:
   ECSCluster:
     Type: AWS::ECS::Cluster
@@ -65,6 +68,45 @@ Resources:
       RetentionInDays: 1
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
+  LogFilterMetric:
+    Type: AWS::Logs::MetricFilter
+    Properties:
+      FilterPattern: '%\[ERROR\] 500%'
+      LogGroupName:
+        Ref: ECSTaskLogGroup
+      MetricTransformations:
+      - MetricName:
+          Fn::Sub: ${taskName}500Count
+        MetricNamespace: Logs
+        MetricValue: 1
+  AlarmTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName:
+        Fn::Sub: ${taskName}-alarm-topic
+      Subscription:
+      - Protocol: email
+        Endpoint:
+          Ref: notificationEmail
+  LogFilterMetricAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName:
+        Fn::Sub: ${taskName}500Count
+      ComparisonOperator: GreaterThanThreshold
+      EvaluationPeriods: 1
+      MetricName: myApi500Count
+      Namespace: My-api
+      Period: 60
+      Statistic: Sum
+      Threshold: 5
+      ActionsEnabled: true
+      AlarmActions:
+      - Fn::GetAtt:
+        - AlarmTopic
+        - TopicArn
+      AlarmDescription: Alarm when 500 errors exceed threshold
+      TreatMissingData: notBreaching
   ECSTaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:

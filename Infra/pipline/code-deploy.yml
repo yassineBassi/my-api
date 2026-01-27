@@ -20,6 +20,9 @@ Parameters:
   TestListenerArn:
     Type: String
     Description: 'The ARN of the test listener'
+  notificationEmail:
+    Type: String
+    Description: 'Email address to send deployment notifications'
 
 Resources:
   CodeDeployApplication:
@@ -58,7 +61,7 @@ Resources:
       TopicName: "my-sns-topic"
       Subscription:
         - Protocol: "email"
-          Endpoint: "yassinebassii@gmail.com"
+          Endpoint: !Ref notificationEmail
 
   CodeDeployDeploymentGroup:
     Type: "AWS::CodeDeploy::DeploymentGroup"
