@@ -90,8 +90,6 @@ Resources:
       Parameters:
         codeBuildProject: !GetAtt CodeBuildStack.Outputs.CodeBuildProjectName
         artifactsBucketName: !GetAtt ArtifactsBucketStack.Outputs.ArtifactsBucketName
-        codeDeoloyApplicationName: !GetAtt CodeDeployStack.Outputs.CodeDeployApplicationName
-        codeDeployDeploymentGroupName: !GetAtt CodeDeployStack.Outputs.CodeDeployDeploymentGroupName
         gitConnectionId: !Ref gitConnectionId
     DeletionPolicy:  Delete
     UpdateReplacePolicy: Delete
