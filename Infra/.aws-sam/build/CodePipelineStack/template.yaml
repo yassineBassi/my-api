@@ -16,6 +16,9 @@ Parameters:
   ECSServiceName:
     Type: String
     Description: The name of the ECS service to deploy to
+  ecsTaskExecutionRoleName:
+    Type: String
+    Description: The name of the ECS task execution role to use
 Resources:
   CodePipelineServiceRole:
     Type: AWS::IAM::Role
@@ -56,6 +59,11 @@ Resources:
             - ecs:DescribeTaskDefinition
             - ecs:RegisterTaskDefinition
             Resource: '*'
+          - Effect: Allow
+            Action:
+            - iam:PassRole
+            Resource:
+              Fn::Sub: arn:aws:iam::${AWS::AccountId}:role/${ecsTaskExecutionRoleName}
   CodePipeline:
     Type: AWS::CodePipeline::Pipeline
     Properties:
