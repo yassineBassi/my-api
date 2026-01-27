@@ -12,7 +12,13 @@ Parameters:
   gitConnectionId: 
     Type: String
     Description: "The CodeConnection Id to use"
-  
+  ECSClusterName:
+    Type: String
+    Description: "The name of the ECS cluster to deploy to"
+  ECSServiceName:
+    Type: String
+    Description: "The name of the ECS service to deploy to"
+
 Resources:
 
   ################### CodePipeline Role ###################
@@ -48,6 +54,13 @@ Resources:
                 Resource: 
                   - !Sub "arn:aws:codestar-connections:*:${AWS::AccountId}:connection/${gitConnectionId}"
                   - !Sub "arn:aws:codeconnections:*:${AWS::AccountId}:connection/${gitConnectionId}"
+              - Effect: "Allow"
+                Action:
+                  - "ecs:DescribeServices"
+                  - "ecs:UpdateService"
+                  - "ecs:DescribeTaskDefinition"
+                  - "ecs:RegisterTaskDefinition"
+                Resource: "*"
 
   ################### CodePipeline Pipeline ###################
   CodePipeline:
@@ -97,6 +110,6 @@ Resources:
               InputArtifacts:
                 - Name: "BuildOutput"
               Configuration:   
-                ClusterName: "test-cluster"
-                ServiceName: "test-service"
+                ClusterName: !Ref ECSClusterName
+                ServiceName: !Ref ECSServiceName
                 FileName: "imagedefinitions.json"

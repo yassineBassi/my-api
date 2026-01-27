@@ -131,6 +131,14 @@ Resources:
           - Outputs.ArtifactsBucketName
         gitConnectionId:
           Ref: gitConnectionId
+        ECSClusterName:
+          Fn::GetAtt:
+          - ECSClusterStack
+          - Outputs.ECSClusterName
+        ECSServiceName:
+          Fn::GetAtt:
+          - ECSClusterStack
+          - Outputs.ECSServiceName
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
     Metadata:
