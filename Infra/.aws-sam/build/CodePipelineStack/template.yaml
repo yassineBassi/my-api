@@ -97,4 +97,4 @@ Resources:
           Configuration:
             ClusterName: test-cluster
             ServiceName: test-service
-            FileName: task-def.json
+            FileName: imagedefinitions.json
