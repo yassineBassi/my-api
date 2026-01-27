@@ -68,7 +68,7 @@ Resources:
           Configuration:
             ConnectionArn: arn:aws:codeconnections:us-east-1:547323802553:connection/9b6d746e-cb84-4a72-b897-78b5c19c0100
             FullRepositoryId: yassineBassi/my-api
-            BranchName: main
+            BranchName: rolling-update
       - Name: Build
         Actions:
         - Name: BuildAction
@@ -84,3 +84,17 @@ Resources:
           Configuration:
             ProjectName:
               Ref: codeBuildProject
+      - Name: Deploy
+        Actions:
+        - Name: DeployAction
+          ActionTypeId:
+            Category: Deploy
+            Owner: AWS
+            Provider: ECS
+            Version: '1'
+          InputArtifacts:
+          - Name: BuildOutput
+          Configuration:
+            ClusterName: test-cluster
+            ServiceName: test-service
+            FileName: task-def.json
