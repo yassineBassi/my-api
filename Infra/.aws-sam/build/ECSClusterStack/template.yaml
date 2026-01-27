@@ -147,7 +147,7 @@ Resources:
       DesiredCount: 1
       LaunchType: FARGATE
       DeploymentController:
-        Type: CODE_DEPLOY
+        Type: ECS
       LoadBalancers:
       - TargetGroupArn:
           Ref: prodTargetGroupArn

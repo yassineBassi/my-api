@@ -116,43 +116,6 @@ Resources:
     UpdateReplacePolicy: Delete
     Metadata:
       SamResourceId: ArtifactsBucketStack
-  CodeDeployStack:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: CodeDeployStack/template.yaml
-      Parameters:
-        ECSClusterName:
-          Fn::GetAtt:
-          - ECSClusterStack
-          - Outputs.ECSClusterName
-        ECSServiceName:
-          Fn::GetAtt:
-          - ECSClusterStack
-          - Outputs.ECSServiceName
-        ProdTargetGroupName:
-          Fn::GetAtt:
-          - LoadBalancerStack
-          - Outputs.ProdTargetGroupName
-        TestTargetGroupName:
-          Fn::GetAtt:
-          - LoadBalancerStack
-          - Outputs.TestTargetGroupName
-        ProdListenerArn:
-          Fn::GetAtt:
-          - LoadBalancerStack
-          - Outputs.ProdListenerArn
-        TestListenerArn:
-          Fn::GetAtt:
-          - LoadBalancerStack
-          - Outputs.TestListenerArn
-        notificationEmail:
-          Ref: notificationEmail
-        logs500ErrorAlarm:
-          Fn::GetAtt:
-          - ECSClusterStack
-          - Outputs.logFilterMetric500Alarm
-    Metadata:
-      SamResourceId: CodeDeployStack
   CodePipelineStack:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -166,14 +129,6 @@ Resources:
           Fn::GetAtt:
           - ArtifactsBucketStack
           - Outputs.ArtifactsBucketName
-        codeDeoloyApplicationName:
-          Fn::GetAtt:
-          - CodeDeployStack
-          - Outputs.CodeDeployApplicationName
-        codeDeployDeploymentGroupName:
-          Fn::GetAtt:
-          - CodeDeployStack
-          - Outputs.CodeDeployDeploymentGroupName
         gitConnectionId:
           Ref: gitConnectionId
     DeletionPolicy: Delete
