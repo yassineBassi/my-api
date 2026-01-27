@@ -9,7 +9,15 @@
                     "containerPort": 3000
                 }
             ],
-            "essential": true
+            "essential": true,
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/<TASK_NAME>",
+                    "awslogs-region": "us-east-1",
+                    "awslogs-stream-prefix": "ecs"
+                }
+            }
 	}
     ],
     "executionRoleArn": "<TASK_ROLE>",

@@ -4,3 +4,6 @@ notification in wait time
 test ecr scan
 logging
 tags
+
+ALB 5xx error rate
+TargetResponseTime p95
