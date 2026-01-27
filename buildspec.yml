@@ -46,7 +46,7 @@ phases:
       - cp imagedefinitions-template.json imagedefinitions.json
       - sed -i "s|<CONTAINER_NAME>|$IMAGE_NAME|g" imagedefinitions.json
       - sed -i "s|<IMAGE_URI>|$IMAGE_URI:latest|g" imagedefinitions.json
-      - cat task-def.json
+      - cat imagedefinitions.json
       
       - echo "build completed"
 
