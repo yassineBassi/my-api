@@ -43,16 +43,13 @@ phases:
       - docker push $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_NAME:latest
 
       - echo "Create task definition revision"
-      - TASK_EXECUTION_ROLE=$(aws ecs describe-task-definition --task-definition $TASK_NAME --query 'taskDefinition.executionRoleArn' --output text)
-      - cp task-def-template.json task-def.json
-      - sed -i "s|<CONTAINER_NAME>|$IMAGE_NAME|g" task-def.json
-      - sed -i "s|<IMAGE>|$IMAGE_URI:latest|g" task-def.json
-      - sed -i "s|<TASK_ROLE>|$TASK_EXECUTION_ROLE|g" task-def.json
-      - sed -i "s|<TASK_NAME>|$TASK_NAME|g" task-def.json
+      - cp imagedefinitions-template.json imagedefinitions.json
+      - sed -i "s|<CONTAINER_NAME>|$IMAGE_NAME|g" imagedefinitions.json
+      - sed -i "s|<IMAGE_URI>|$IMAGE_URI:latest|g" imagedefinitions.json
       - cat task-def.json
       
       - echo "build completed"
 
 artifacts: 
   files:
-    - task-def.json
+    - imagedefinitions.json
