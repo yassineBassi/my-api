@@ -147,8 +147,10 @@ Resources:
           - Outputs.TestListenerArn
         notificationEmail:
           Ref: notificationEmail
-    DeletionPolicy: Delete
-    UpdateReplacePolicy: Delete
+        logs500ErrorAlarm:
+          Fn::GetAtt:
+          - ECSClusterStack
+          - Outputs.logFilterMetric500Alarm
     Metadata:
       SamResourceId: CodeDeployStack
   CodePipelineStack:

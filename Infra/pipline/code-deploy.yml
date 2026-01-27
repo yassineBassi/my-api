@@ -23,6 +23,9 @@ Parameters:
   notificationEmail:
     Type: String
     Description: 'Email address to send deployment notifications'
+  logs500ErrorAlarm: 
+    Type: String
+    Description: 'A list of alarm names to monitor during deployment'
 
 Resources:
   CodeDeployApplication:
@@ -103,7 +106,16 @@ Resources:
             - DeploymentReady
           TriggerName: "ECS-Deployment-Success-Trigger"
           TriggerTargetArn: !GetAtt DeploymentNotificationSNS.TopicArn
-
+      AlarmConfiguration:
+        Alarms:
+          - Name: !Ref logs500ErrorAlarm
+        Enabled: true
+        IgnorePollAlarmFailure: false
+      AutoRollbackConfiguration:
+        Enabled: true
+        Events:
+          - DEPLOYMENT_FAILURE
+          - DEPLOYMENT_STOP_ON_ALARM
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
     

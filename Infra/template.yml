@@ -95,8 +95,7 @@ Resources:
         ProdListenerArn: !GetAtt LoadBalancerStack.Outputs.ProdListenerArn
         TestListenerArn: !GetAtt LoadBalancerStack.Outputs.TestListenerArn
         notificationEmail: !Ref notificationEmail
-    DeletionPolicy:  Delete
-    UpdateReplacePolicy: Delete
+        logs500ErrorAlarm: !GetAtt ECSClusterStack.Outputs.logFilterMetric500Alarm
 
   CodePipelineStack:
     Type: 'AWS::CloudFormation::Stack'

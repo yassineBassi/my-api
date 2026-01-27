@@ -101,11 +101,11 @@ Resources:
   LogFilterMetricAlarm:
     Type: 'AWS::CloudWatch::Alarm'
     Properties:
-      AlarmName: !Sub '${taskName}500Count'
+      AlarmName: !Sub '${taskName}500Count-alarm'
       ComparisonOperator: GreaterThanThreshold
       EvaluationPeriods: 1
-      MetricName: 'myApi500Count'
-      Namespace: 'My-api'
+      MetricName: !Sub '${taskName}500Count'
+      Namespace: 'Logs'
       Period: 60
       Statistic: Sum
       Threshold: 5
@@ -170,3 +170,6 @@ Outputs:
   ecsTaskExecutionRoleName:
     Description: 'The ECS task execution role'
     Value: !Ref ECSTaskExecutionRole
+  logFilterMetric500Alarm:
+    Description: 'The log filter metric 500 alarm'
+    Value: !Ref LogFilterMetricAlarm
