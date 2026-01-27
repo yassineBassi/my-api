@@ -57,6 +57,14 @@ Resources:
           Action: sts:AssumeRole
       ManagedPolicyArns:
       - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+  ECSTaskLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName:
+        Fn::Sub: /ecs/${taskName}
+      RetentionInDays: 1
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
   ECSTaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
@@ -77,6 +85,14 @@ Resources:
         PortMappings:
         - ContainerPort: 3000
           Protocol: tcp
+        LogConfiguration:
+          LogDriver: awslogs
+          Options:
+            awslogs-group:
+              Ref: ECSTaskLogGroup
+            awslogs-region:
+              Ref: AWS::Region
+            awslogs-stream-prefix: ecs
   ECSService:
     Type: AWS::ECS::Service
     Properties:
