@@ -9,12 +9,6 @@ Parameters:
   artifactsBucketName:
     Type: String
     Description: "The name of the S3 bucket to store CodePipeline artifacts"
-  codeDeoloyApplicationName:
-    Type: String
-    Description: "The name of the CodeDeploy application"
-  codeDeployDeploymentGroupName:
-    Type: String
-    Description: "The name of the CodeDeploy deployment group"
   gitConnectionId: 
     Type: String
     Description: "The CodeConnection Id to use"
@@ -54,20 +48,6 @@ Resources:
                 Resource: 
                   - !Sub "arn:aws:codestar-connections:*:${AWS::AccountId}:connection/${gitConnectionId}"
                   - !Sub "arn:aws:codeconnections:*:${AWS::AccountId}:connection/${gitConnectionId}"
-              - Effect: "Allow"
-                Action: 
-                  - "codedeploy:RegisterApplicationRevision"
-                  - "codedeploy:GetApplicationRevision"
-                Resource: !Sub "arn:aws:codedeploy:${AWS::Region}:${AWS::AccountId}:application:${codeDeoloyApplicationName}"
-              - Effect: "Allow"
-                Action:
-                  - "codedeploy:CreateDeployment"
-                  - "codedeploy:GetDeploymentConfig"
-                  - "codedeploy:GetDeployment"
-                Resource: !Sub  "arn:aws:codedeploy:${AWS::Region}:${AWS::AccountId}:deploymentgroup:${codeDeoloyApplicationName}/${codeDeployDeploymentGroupName}"
-              - Effect: "Allow"
-                Action: "codedeploy:GetDeploymentConfig"
-                Resource: "arn:aws:codedeploy:us-east-1:547323802553:deploymentconfig:CodeDeployDefault.ECSCanary10Percent5Minutes"
 
   ################### CodePipeline Pipeline ###################
   CodePipeline:
@@ -106,18 +86,4 @@ Resources:
                 - Name: "BuildOutput"
               Configuration:
                 ProjectName: !Ref codeBuildProject
-        - Name: "Deploy"
-          Actions:
-            - Name: "DeployAction"
-              ActionTypeId:
-                Category: "Deploy"
-                Owner: "AWS"
-                Provider: "CodeDeploy"
-                Version: "1"
-              InputArtifacts:
-                - Name: "BuildOutput"
-              Configuration:
-                ApplicationName: !Ref codeDeoloyApplicationName
-                DeploymentGroupName: !Ref codeDeployDeploymentGroupName
-
 
