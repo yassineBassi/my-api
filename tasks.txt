@@ -7,3 +7,41 @@ tags
 
 ALB 5xx error rate
 TargetResponseTime p95
+
+
+
+load balancer
+  - :80 listener
+    - target-1 100%
+    - target-2 0%
+  - :8080 listener
+    - target-2 100%
+
+ecsService:
+  - prod target : target-1
+  - alternative target: target-2
+  - test listener:  :8080
+
+1 deploy
+  deploy/prod -> target-2
+  test -> target-1
+  trafic shifting: 
+  - :80 listener
+    - target-1 0%
+    - target-2 100%
+  - :8080 listener
+    - target-1 100%
+
+
+
+
+------ case
+
+prod -> tg-1
+
+:80
+  - tg-1 100%
+  - tg-2 100%
+:8080
+  - tg-1 100%
+  - tg-2 0%
