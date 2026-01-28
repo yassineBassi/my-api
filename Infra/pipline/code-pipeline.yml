@@ -12,7 +12,16 @@ Parameters:
   gitConnectionId: 
     Type: String
     Description: "The CodeConnection Id to use"
-  
+  ECSClusterName:
+    Type: String
+    Description: "The name of the ECS cluster to deploy to"
+  ECSServiceName:
+    Type: String
+    Description: "The name of the ECS service to deploy to"
+  ecsTaskExecutionRoleName:
+    Type: String
+    Description: "The name of the ECS task execution role to use"
+
 Resources:
 
   ################### CodePipeline Role ###################
@@ -48,6 +57,18 @@ Resources:
                 Resource: 
                   - !Sub "arn:aws:codestar-connections:*:${AWS::AccountId}:connection/${gitConnectionId}"
                   - !Sub "arn:aws:codeconnections:*:${AWS::AccountId}:connection/${gitConnectionId}"
+              - Effect: "Allow"
+                Action:
+                  - "ecs:DescribeServices"
+                  - "ecs:UpdateService"
+                  - "ecs:DescribeTaskDefinition"
+                  - "ecs:RegisterTaskDefinition"
+                Resource: "*"
+              - Effect: "Allow"
+                Action:
+                  - "iam:PassRole"
+                Resource:  !Sub "arn:aws:iam::${AWS::AccountId}:role/${ecsTaskExecutionRoleName}"
+              
 
   ################### CodePipeline Pipeline ###################
   CodePipeline:
@@ -71,7 +92,7 @@ Resources:
               Configuration:
                 ConnectionArn: "arn:aws:codeconnections:us-east-1:547323802553:connection/9b6d746e-cb84-4a72-b897-78b5c19c0100"
                 FullRepositoryId: "yassineBassi/my-api"
-                BranchName: "main"
+                BranchName: "rolling-update"
         - Name: "Build"
           Actions:
             - Name: "BuildAction"
@@ -86,4 +107,17 @@ Resources:
                 - Name: "BuildOutput"
               Configuration:
                 ProjectName: !Ref codeBuildProject
-
+        - Name: "Deploy"
+          Actions:
+            - Name: "DeployAction"
+              ActionTypeId:
+                Category: "Deploy"
+                Owner: "AWS"
+                Provider: "ECS"
+                Version: "1"
+              InputArtifacts:
+                - Name: "BuildOutput"
+              Configuration:   
+                ClusterName: !Ref ECSClusterName
+                ServiceName: !Ref ECSServiceName
+                FileName: "imagedefinitions.json"

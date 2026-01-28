@@ -1,6 +1,6 @@
 const https = require("https");
 const { URL } = require("url");
-const { S3Client, ListObjectsV2Command, DeleteObjectsCommand } = require("@aws-sdk/client-s3");
+const { S3Client, ListObjectVersionsCommand, DeleteObjectsCommand } = require("@aws-sdk/client-s3");
 
 const s3 = new S3Client({});
 
@@ -44,28 +44,49 @@ exports.handler = async (event, context) => {
         console.log(`Emptying bucket: ${bucketName}`);
 
         if (event.RequestType === "Delete") {
-            let token;
+            let keyMarker;
+            let versionIdMarker;
             do {
-                const listResp = await s3.send(
-                new ListObjectsV2Command({
-                    Bucket: bucketName,
-                    ContinuationToken: token
-                })
-                );
-
-                token = listResp.NextContinuationToken;
-
-                if (listResp.Contents && listResp.Contents.length > 0) {
-                await s3.send(
-                    new DeleteObjectsCommand({
-                    Bucket: bucketName,
-                    Delete: {
-                        Objects: listResp.Contents.map(o => ({ Key: o.Key }))
-                    }
+                const resp = await s3.send(
+                    new ListObjectVersionsCommand({
+                        Bucket: bucketName,
+                        KeyMarker: keyMarker,
+                        VersionIdMarker: versionIdMarker
                     })
                 );
+
+                keyMarker = resp.NextKeyMarker;
+                versionIdMarker = resp.NextVersionIdMarker;
+                
+                const objects = [];
+                
+                if (resp.Versions) {
+                    for (const v of resp.Versions) {
+                      objects.push({
+                        Key: v.Key,
+                        VersionId: v.VersionId,
+                      });
+                    }
                 }
-            } while (token);
+
+                if (resp.DeleteMarkers) {
+                    for (const d of resp.DeleteMarkers) {
+                      objects.push({
+                        Key: d.Key,
+                        VersionId: d.VersionId,
+                      });
+                    }
+                }
+
+                if (objects.length > 0) {
+                    await s3.send(
+                      new DeleteObjectsCommand({
+                        Bucket: bucketName,
+                        Delete: { Objects: objects },
+                      })
+                    );
+                }
+            } while (keyMarker);
         }
 
         await sendResponse("SUCCESS", event, context);

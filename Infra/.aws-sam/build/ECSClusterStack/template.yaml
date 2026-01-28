@@ -144,10 +144,10 @@ Resources:
       ServiceName: my-ecs-service
       TaskDefinition:
         Ref: ECSTaskDefinition
-      DesiredCount: 1
+      DesiredCount: 5
       LaunchType: FARGATE
       DeploymentController:
-        Type: CODE_DEPLOY
+        Type: ECS
       LoadBalancers:
       - TargetGroupArn:
           Ref: prodTargetGroupArn
@@ -162,6 +162,9 @@ Resources:
             - Ref: ecsSubnets
           SecurityGroups:
           - Ref: ECSServiceSecurityGroup
+      DeploymentConfiguration:
+        MaximumPercent: 150
+        MinimumHealthyPercent: 100
 Outputs:
   ECSClusterName:
     Description: The name of the ECS cluster
