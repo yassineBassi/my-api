@@ -151,6 +151,10 @@ Resources:
           Fn::GetAtt:
           - ECSClusterStack
           - Outputs.ECSServiceName
+        ecsTaskExecutionRoleName:
+          Fn::GetAtt:
+          - ECSClusterStack
+          - Outputs.ecsTaskExecutionRoleName
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
     Metadata:

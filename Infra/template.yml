@@ -96,6 +96,7 @@ Resources:
         gitConnectionId: !Ref gitConnectionId
         ECSClusterName: !GetAtt ECSClusterStack.Outputs.ECSClusterName
         ECSServiceName: !GetAtt ECSClusterStack.Outputs.ECSServiceName
+        ecsTaskExecutionRoleName: !GetAtt ECSClusterStack.Outputs.ecsTaskExecutionRoleName
     DeletionPolicy:  Delete
     UpdateReplacePolicy: Delete
   

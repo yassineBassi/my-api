@@ -18,6 +18,9 @@ Parameters:
   ECSServiceName:
     Type: String
     Description: "The name of the ECS service to deploy to"
+  ecsTaskExecutionRoleName:
+    Type: String
+    Description: "The name of the ECS task execution role to assume"
 
 Resources:
 
@@ -54,6 +57,17 @@ Resources:
                 Resource: 
                   - !Sub "arn:aws:codestar-connections:*:${AWS::AccountId}:connection/${gitConnectionId}"
                   - !Sub "arn:aws:codeconnections:*:${AWS::AccountId}:connection/${gitConnectionId}"
+              - Effect: "Allow"
+                Action:
+                  - "ecs:DescribeServices"
+                  - "ecs:UpdateService"
+                  - "ecs:DescribeTaskDefinition"
+                  - "ecs:RegisterTaskDefinition"
+                Resource: "*"
+              - Effect: "Allow"
+                Action:
+                  - "iam:PassRole"
+                Resource:  !Sub "arn:aws:iam::${AWS::AccountId}:role/${ecsTaskExecutionRoleName}"
 
   ################### CodePipeline Pipeline ###################
   CodePipeline:
