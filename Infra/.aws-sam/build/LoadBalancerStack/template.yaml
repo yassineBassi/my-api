@@ -17,12 +17,12 @@ Resources:
       VpcId:
         Ref: vpc
       TargetType: ip
-      HealthCheckIntervalSeconds: 30
+      HealthCheckIntervalSeconds: 10
       HealthCheckPath: /
       HealthCheckPort: '3000'
       HealthCheckProtocol: HTTP
       HealthCheckTimeoutSeconds: 5
-      HealthyThresholdCount: 5
+      HealthyThresholdCount: 3
       Matcher:
         HttpCode: '200'
       UnhealthyThresholdCount: 2
@@ -35,12 +35,12 @@ Resources:
       VpcId:
         Ref: vpc
       TargetType: ip
-      HealthCheckIntervalSeconds: 30
+      HealthCheckIntervalSeconds: 10
       HealthCheckPath: /
       HealthCheckPort: '3000'
       HealthCheckProtocol: HTTP
       HealthCheckTimeoutSeconds: 5
-      HealthyThresholdCount: 5
+      HealthyThresholdCount: 3
       Matcher:
         HttpCode: '200'
       UnhealthyThresholdCount: 2
