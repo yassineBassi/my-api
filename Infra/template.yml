@@ -59,6 +59,9 @@ Resources:
         ecrRepositoryName: !Ref ecrRepositoryName
         taskName: !Ref taskName
         notificationEmail: !Ref notificationEmail
+        TestTargetGroupArn: !GetAtt LoadBalancerStack.Outputs.TestTargetGroupArn
+        ProdListenerRule: !GetAtt LoadBalancerStack.Outputs.ProdListenerRule
+        TestListenerRule: !GetAtt LoadBalancerStack.Outputs.TestListenerRule
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
 
@@ -83,20 +86,6 @@ Resources:
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
 
-  CodeDeployStack:
-    Type: 'AWS::CloudFormation::Stack'
-    Properties:
-      TemplateURL: ./pipline/code-deploy.yml
-      Parameters:
-        ECSClusterName: !GetAtt ECSClusterStack.Outputs.ECSClusterName
-        ECSServiceName: !GetAtt ECSClusterStack.Outputs.ECSServiceName
-        ProdTargetGroupName: !GetAtt LoadBalancerStack.Outputs.ProdTargetGroupName
-        TestTargetGroupName: !GetAtt LoadBalancerStack.Outputs.TestTargetGroupName
-        ProdListenerArn: !GetAtt LoadBalancerStack.Outputs.ProdListenerArn
-        TestListenerArn: !GetAtt LoadBalancerStack.Outputs.TestListenerArn
-        notificationEmail: !Ref notificationEmail
-        logs500ErrorAlarm: !GetAtt ECSClusterStack.Outputs.logFilterMetric500Alarm
-
   CodePipelineStack:
     Type: 'AWS::CloudFormation::Stack'
     Properties:
@@ -104,9 +93,9 @@ Resources:
       Parameters:
         codeBuildProject: !GetAtt CodeBuildStack.Outputs.CodeBuildProjectName
         artifactsBucketName: !GetAtt ArtifactsBucketStack.Outputs.ArtifactsBucketName
-        codeDeoloyApplicationName: !GetAtt CodeDeployStack.Outputs.CodeDeployApplicationName
-        codeDeployDeploymentGroupName: !GetAtt CodeDeployStack.Outputs.CodeDeployDeploymentGroupName
         gitConnectionId: !Ref gitConnectionId
+        ECSClusterName: !GetAtt ECSClusterStack.Outputs.ECSClusterName
+        ECSServiceName: !GetAtt ECSClusterStack.Outputs.ECSServiceName
     DeletionPolicy:  Delete
     UpdateReplacePolicy: Delete
   

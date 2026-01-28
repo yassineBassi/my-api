@@ -80,15 +80,35 @@ Resources:
       Type: application
 
   ################### Load Balancer Listners ###################
+
   ProdListener:
     Type: 'AWS::ElasticLoadBalancingV2::Listener'
     Properties: 
       DefaultActions: 
         - Type: forward
-          TargetGroupArn: !Ref TargetGroup1
+          ForwardConfig:
+            TargetGroups:
+            - TargetGroupArn: !Ref TargetGroup1
+              Weight: 1
+            - TargetGroupArn: !Ref TargetGroup2
+              Weight: 0
+
       LoadBalancerArn: !Ref LoadBalancer
       Port: 80
       Protocol: HTTP
+
+  ProdListenerRule:
+    Type: 'AWS::ElasticLoadBalancingV2::ListenerRule'
+    Properties:
+      Actions: 
+        - Type: forward
+          TargetGroupArn: !Ref TargetGroup1
+      Priority: 1
+      Conditions:
+        - Field: path-pattern
+          Values: 
+            - /prod/*
+      ListenerArn: !Ref ProdListener
 
   TestListener:
     Type: 'AWS::ElasticLoadBalancingV2::Listener'
@@ -100,6 +120,19 @@ Resources:
       Port: 8080
       Protocol: HTTP
 
+  TestListenerRule:
+    Type: 'AWS::ElasticLoadBalancingV2::ListenerRule'
+    Properties:
+      Actions: 
+        - Type: forward
+          TargetGroupArn: !Ref TargetGroup2
+      Priority: 1
+      Conditions:
+        - Field: path-pattern
+          Values: 
+            - /test/*
+      ListenerArn: !Ref TestListener
+
 Outputs:
   SecurityGoup: 
     Value: !Ref LoadBalancerSecurityGroup
@@ -110,6 +143,9 @@ Outputs:
   ProdTargetGroupArn:
     Value: !Ref TargetGroup1
     Description: 'The ARN of the production target group'
+  TestTargetGroupArn:
+    Value: !Ref TargetGroup2
+    Description: 'The ARN of the test target group'
   ProdTargetGroupName:
     Value: !GetAtt TargetGroup1.TargetGroupName
     Description: 'The name of the production target group'
@@ -122,3 +158,9 @@ Outputs:
   TestListenerArn:
     Value: !Ref TestListener
     Description: 'The ARN of the test listener'
+  ProdListenerRule:
+    Value: !Ref ProdListenerRule
+    Description: 'The rule for the production listener'
+  TestListenerRule:
+    Value: !Ref TestListenerRule
+    Description: 'The rule for the test listener'

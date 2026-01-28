@@ -13,6 +13,9 @@ Parameters:
   prodTargetGroupArn:
     Type: String
     Description: The ARN of the production target group
+  TestTargetGroupArn:
+    Type: String
+    Description: The ARN of the test target group
   defaultRepositoryName:
     Type: String
     Description: The default ECR image name
@@ -25,6 +28,12 @@ Parameters:
   notificationEmail:
     Type: String
     Description: Email address for CloudWatch alarms
+  ProdListenerRule:
+    Type: String
+    Description: The ARN of the production listener rule
+  TestListenerRule:
+    Type: String
+    Description: The ARN of the test listener rule
 Resources:
   ECSCluster:
     Type: AWS::ECS::Cluster
@@ -136,6 +145,25 @@ Resources:
             awslogs-region:
               Ref: AWS::Region
             awslogs-stream-prefix: ecs
+  ECSServiceBlueGreenRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: ecs.amazonaws.com
+          Action: sts:AssumeRole
+      Policies:
+      - PolicyName: ECSBlueGreenPolicy
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - elasticloadbalancing:*
+            Resource: '*'
   ECSService:
     Type: AWS::ECS::Service
     Properties:
@@ -144,15 +172,26 @@ Resources:
       ServiceName: my-ecs-service
       TaskDefinition:
         Ref: ECSTaskDefinition
-      DesiredCount: 1
+      DesiredCount: 5
       LaunchType: FARGATE
       DeploymentController:
-        Type: CODE_DEPLOY
+        Type: ECS
       LoadBalancers:
-      - TargetGroupArn:
-          Ref: prodTargetGroupArn
-        ContainerName: my-api
+      - ContainerName: my-api
         ContainerPort: 3000
+        TargetGroupArn:
+          Ref: prodTargetGroupArn
+        AdvancedConfiguration:
+          AlternateTargetGroupArn:
+            Ref: TestTargetGroupArn
+          ProductionListenerRule:
+            Ref: ProdListenerRule
+          RoleArn:
+            Fn::GetAtt:
+            - ECSServiceBlueGreenRole
+            - Arn
+          TestListenerRule:
+            Ref: TestListenerRule
       NetworkConfiguration:
         AwsvpcConfiguration:
           AssignPublicIp: ENABLED
