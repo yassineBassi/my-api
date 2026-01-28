@@ -47,7 +47,7 @@ exports.handler = async (event, context) => {
             let keyMarker;
             let versionIdMarker;
             do {
-                const listResp = await s3.send(
+                const resp = await s3.send(
                     new ListObjectVersionsCommand({
                         Bucket: bucketName,
                         KeyMarker: keyMarker,
@@ -86,7 +86,7 @@ exports.handler = async (event, context) => {
                       })
                     );
                 }
-            } while (token);
+            } while (keyMarker);
         }
 
         await sendResponse("SUCCESS", event, context);
