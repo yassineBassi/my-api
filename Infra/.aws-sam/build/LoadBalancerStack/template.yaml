@@ -22,7 +22,7 @@ Resources:
       HealthCheckPort: '3000'
       HealthCheckProtocol: HTTP
       HealthCheckTimeoutSeconds: 5
-      HealthyThresholdCount: 5
+      HealthyThresholdCount: 2
       Matcher:
         HttpCode: '200'
       UnhealthyThresholdCount: 2
@@ -35,12 +35,12 @@ Resources:
       VpcId:
         Ref: vpc
       TargetType: ip
-      HealthCheckIntervalSeconds: 30
+      HealthCheckIntervalSeconds: 10
       HealthCheckPath: /
       HealthCheckPort: '3000'
       HealthCheckProtocol: HTTP
       HealthCheckTimeoutSeconds: 5
-      HealthyThresholdCount: 5
+      HealthyThresholdCount: 2
       Matcher:
         HttpCode: '200'
       UnhealthyThresholdCount: 2
@@ -76,14 +76,8 @@ Resources:
     Properties:
       DefaultActions:
       - Type: forward
-        ForwardConfig:
-          TargetGroups:
-          - TargetGroupArn:
-              Ref: TargetGroup1
-            Weight: 1
-          - TargetGroupArn:
-              Ref: TargetGroup2
-            Weight: 0
+        TargetGroupArn:
+          Ref: TargetGroup1
       LoadBalancerArn:
         Ref: LoadBalancer
       Port: 80
@@ -93,13 +87,19 @@ Resources:
     Properties:
       Actions:
       - Type: forward
-        TargetGroupArn:
-          Ref: TargetGroup1
+        ForwardConfig:
+          TargetGroups:
+          - TargetGroupArn:
+              Ref: TargetGroup1
+            Weight: 1
+          - TargetGroupArn:
+              Ref: TargetGroup2
+            Weight: 0
       Priority: 1
       Conditions:
       - Field: path-pattern
         Values:
-        - /prod/*
+        - /*
       ListenerArn:
         Ref: ProdListener
   TestListener:
@@ -124,7 +124,7 @@ Resources:
       Conditions:
       - Field: path-pattern
         Values:
-        - /test/*
+        - /*
       ListenerArn:
         Ref: TestListener
 Outputs:

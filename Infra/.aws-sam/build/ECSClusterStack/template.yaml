@@ -176,6 +176,9 @@ Resources:
       LaunchType: FARGATE
       DeploymentController:
         Type: ECS
+      DeploymentConfiguration:
+        Strategy: BLUE_GREEN
+        BakeTimeInMinutes: 3
       LoadBalancers:
       - ContainerName: my-api
         ContainerPort: 3000
